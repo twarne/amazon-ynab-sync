@@ -21,8 +21,14 @@ export default class OrderReportsCsv {
       const files = await readdir(this.fileLoc);
       for (const file of files) {
         console.log(file);
-        const parser = createReadStream(`${this.fileLoc}/${file}`).pipe(parse({}));
-        for await (const record of parser) {
+        const parser = createReadStream(`${this.fileLoc}/${file}`).pipe(
+          parse({ info: true, columns: true }),
+        );
+        for await (const recordInfo of parser) {
+          if (this.convertRecord(recordInfo.record)) {
+          } else {
+            console.error(`Failed to convert record ${recordInfo.info.index}`);
+          }
         }
       }
     } catch (err) {
@@ -31,6 +37,8 @@ export default class OrderReportsCsv {
 
     return true;
   }
+
+  convertRecord(record: any): boolean {}
 
   /**   getItems(options?: {
     /** Start of date range to report. *
